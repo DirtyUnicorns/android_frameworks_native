@@ -559,6 +559,7 @@ static void drop_privileges() {
     capdata[CAP_TO_INDEX(CAP_CHOWN)].permitted        |= CAP_TO_MASK(CAP_CHOWN);
     capdata[CAP_TO_INDEX(CAP_SETUID)].permitted       |= CAP_TO_MASK(CAP_SETUID);
     capdata[CAP_TO_INDEX(CAP_SETGID)].permitted       |= CAP_TO_MASK(CAP_SETGID);
+    capdata[CAP_TO_INDEX(CAP_FOWNER)].permitted       |= CAP_TO_MASK(CAP_FOWNER);
 
     capdata[0].effective = capdata[0].permitted;
     capdata[1].effective = capdata[1].permitted;

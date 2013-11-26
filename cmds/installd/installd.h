@@ -77,6 +77,9 @@
 
 #define UPDATE_COMMANDS_DIR_PREFIX  "/system/etc/updatecmds/"
 
+#define IDMAP_PREFIX           "/data/resource-cache/"
+#define IDMAP_SUFFIX           "@idmap"
+
 #define PKG_NAME_MAX  128   /* largest allowed package name */
 #define PKG_PATH_MAX  256   /* max size of any path we use */
 
