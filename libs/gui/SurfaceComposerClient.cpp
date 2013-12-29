@@ -669,8 +669,6 @@ ssize_t SurfaceComposerClient::getDisplayOrientation(int32_t displayId) {
 }
 #endif
 
-// ----------------------------------------------------------------------------
-
 #ifndef FORCE_SCREENSHOT_CPU_PATH
 #define SS_CPU_CONSUMER false
 #else
