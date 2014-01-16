@@ -77,10 +77,10 @@ enum {
     ACONFIGURATION_SCREENLONG_NO = 0x1,
     ACONFIGURATION_SCREENLONG_YES = 0x2,
 
-    ACONFIGURATION_UI_INVERTED_MODE_ANY = 0x0000,
-    ACONFIGURATION_UI_INVERTED_MODE_NORMAL = 0x0001,
-    ACONFIGURATION_UI_INVERTED_MODE_YES = 0x0002,
-    ACONFIGURATION_UI_INVERTED_MODE_NO = 0x0003,
+    ACONFIGURATION_UI_THEME_MODE_ANY = 0x0000,
+    ACONFIGURATION_UI_THEME_MODE_NORMAL = 0x0001,
+    ACONFIGURATION_UI_THEME_MODE_HOLO_DARK = 0x0002,
+    ACONFIGURATION_UI_THEME_MODE_HOLO_LIGHT = 0x0003,
 
     ACONFIGURATION_UI_MODE_TYPE_ANY = 0x00,
     ACONFIGURATION_UI_MODE_TYPE_NORMAL = 0x01,
@@ -115,7 +115,7 @@ enum {
     ACONFIGURATION_SCREEN_SIZE = 0x0200,
     ACONFIGURATION_VERSION = 0x0400,
     ACONFIGURATION_SCREEN_LAYOUT = 0x0800,
-    ACONFIGURATION_UI_INVERTED_MODE = 0x8000,
+    ACONFIGURATION_UI_THEME_MODE = 0x0900,
     ACONFIGURATION_UI_MODE = 0x1000,
     ACONFIGURATION_SMALLEST_SCREEN_SIZE = 0x2000,
     ACONFIGURATION_LAYOUTDIR = 0x4000,
@@ -292,14 +292,14 @@ int32_t AConfiguration_getScreenLong(AConfiguration* config);
 void AConfiguration_setScreenLong(AConfiguration* config, int32_t screenLong);
 
 /**
- * Return the current ACONFIGURATION_UI_INVERTED_MODE_* set in the configuration.
+ * Return the current ACONFIGURATION_UI_THEME_MODE_* set in the configuration.
  */
-int32_t AConfiguration_getUiInvertedMode(AConfiguration* config);
+int32_t AConfiguration_getUiThemeMode(AConfiguration* config);
 
 /**
- * Set the current inverted UI mode in the configuration.
+ * Set the current theme UI mode in the configuration.
  */
-void AConfiguration_setUiInvertedMode(AConfiguration* config, int32_t uiInvertedMode);
+void AConfiguration_setUiThemeMode(AConfiguration* config, int32_t uiThemeMode);
 
 /**
  * Return the current ACONFIGURATION_UI_MODE_TYPE_* set in the configuration.
