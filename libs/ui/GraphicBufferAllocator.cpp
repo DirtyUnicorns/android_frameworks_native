@@ -121,7 +121,7 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h,
     }
     ALOGW_IF(err, "alloc(%u, %u, %d, %08x, %d ...) failed %d (%s)",
             w, h, format, usage, bufferSize, err, strerror(-err));
-#else
+#endif
 
 #ifdef EXYNOS4_ENHANCEMENTS
     if ((format == 0x101) || (format == 0x105) || (format == 0x107)) {
@@ -132,10 +132,12 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h,
     }
 #endif
 
+#ifndef QCOM_BSP
     err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
+#endif
+
     ALOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
             w, h, format, usage, err, strerror(-err));
-#endif
 
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
