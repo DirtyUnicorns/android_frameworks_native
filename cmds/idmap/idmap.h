@@ -19,12 +19,18 @@
 #endif
 
 int idmap_create_path(const char *target_apk_path, const char *overlay_apk_path,
+<<<<<<< HEAD
         uint32_t target_hash, uint32_t overlay_hash,
         const char *redirections, const char *idmap_path);
 
 int idmap_create_fd(const char *target_apk_path, const char *overlay_apk_path,
         uint32_t target_hash, uint32_t overlay_hash,
         const char *redirections, int fd);
+=======
+        const char *idmap_path);
+
+int idmap_create_fd(const char *target_apk_path, const char *overlay_apk_path, int fd);
+>>>>>>> 2569766... New command line tool 'idmap'
 
 // Regarding target_package_name: the idmap_scan implementation should
 // be able to extract this from the manifest in target_apk_path,
