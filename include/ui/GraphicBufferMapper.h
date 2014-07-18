@@ -49,7 +49,7 @@ public:
             int usage, const Rect& bounds, android_ycbcr *ycbcr);
 
     status_t unlock(buffer_handle_t handle);
-    
+
 #ifdef EXYNOS4_ENHANCEMENTS
     status_t getphys(buffer_handle_t handle, void** paddr);
 #endif

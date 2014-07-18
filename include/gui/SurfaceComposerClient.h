@@ -39,6 +39,9 @@ namespace android {
 
 class DisplayInfo;
 class Composer;
+#ifdef USE_MHEAP_SCREENSHOT
+class IMemoryHeap;
+#endif
 class ISurfaceComposerClient;
 class IGraphicBufferProducer;
 class Region;
@@ -73,10 +76,10 @@ public:
 
     /* triggers screen on and waits for it to complete */
     static void unblankDisplay(const sp<IBinder>& display);
-
-#if defined(TOROPLUS_RADIO)
+    // TODO: Remove me.  Do not use.
+    // This is a compatibility shim for one product whose drivers are depending on
+    // this legacy function (when they shouldn't).
     static status_t getDisplayInfo(int32_t displayId, DisplayInfo* info);
-#endif
 
 #if defined(ICS_CAMERA_BLOB) || defined(MR0_CAMERA_BLOB)
     static ssize_t getDisplayWidth(int32_t displayId);
@@ -179,6 +182,9 @@ public:
             uint32_t minLayerZ, uint32_t maxLayerZ);
 
 private:
+#ifdef USE_MHEAP_SCREENSHOT
+    sp<IMemoryHeap> mHeap;
+#endif
     mutable sp<CpuConsumer> mCpuConsumer;
     mutable sp<BufferQueue> mBufferQueue;
     CpuConsumer::LockedBuffer mBuffer;

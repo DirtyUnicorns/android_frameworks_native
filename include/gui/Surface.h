@@ -78,10 +78,10 @@ public:
         return surface != NULL && surface->getIGraphicBufferProducer() != NULL;
     }
 
-#ifdef QCOM_HARDWARE
-    virtual int32_t getSessionId(){
-        return reinterpret_cast<int>(mGraphicBufferProducer.get());
-    }
+#ifdef QCOM_BSP
+    /* sets dirty rectangle of the buffer that gets queued next for the
+     * Surface */
+    status_t setDirtyRect(const Rect* dirtyRect);
 #endif
 
 protected:
@@ -125,9 +125,7 @@ private:
     int dispatchSetCrop(va_list args);
     int dispatchSetPostTransformCrop(va_list args);
     int dispatchSetUsage(va_list args);
-#ifdef QCOM_HARDWARE
     int dispatchSetBuffersSize(va_list args);
-#endif
     int dispatchLock(va_list args);
     int dispatchUnlockAndPost(va_list args);
 
@@ -152,9 +150,7 @@ protected:
     virtual int setBuffersTimestamp(int64_t timestamp);
     virtual int setCrop(Rect const* rect);
     virtual int setUsage(uint32_t reqUsage);
-#ifdef QCOM_HARDWARE
     virtual int setBuffersSize(int size);
-#endif
 
 public:
     virtual int lock(ANativeWindow_Buffer* outBuffer, ARect* inOutDirtyBounds);
@@ -203,11 +199,9 @@ private:
     // at the next deuque operation. It is initialized to 0.
     uint32_t mReqUsage;
 
-#ifdef QCOM_HARDWARE
     // mReqSize is the size of the buffer that will be requested
     // at the next dequeue operation. It is initialized to 0.
     uint32_t mReqSize;
-#endif
 
     // mTimestamp is the timestamp that will be used for the next buffer queue
     // operation. It defaults to NATIVE_WINDOW_TIMESTAMP_AUTO, which means that
@@ -217,6 +211,12 @@ private:
     // mCrop is the crop rectangle that will be used for the next buffer
     // that gets queued. It is set by calling setCrop.
     Rect mCrop;
+
+#ifdef QCOM_BSP
+    // mDirtyRect is the dirty rectangle set for the next buffer that gets
+    // queued. It is set by calling setDirtyRect.
+    Rect mDirtyRect;
+#endif
 
     // mScalingMode is the scaling mode that will be used for the next
     // buffers that get queued. It is set by calling setScalingMode.
@@ -272,6 +272,10 @@ private:
 
     // must be accessed from lock/unlock thread only
     Region mDirtyRegion;
+
+#ifdef SURFACE_SKIP_FIRST_DEQUEUE
+    bool                        mDequeuedOnce;
+#endif
 };
 
 }; // namespace android

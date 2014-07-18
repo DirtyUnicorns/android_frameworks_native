@@ -41,6 +41,7 @@
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/ISurfaceComposerClient.h>
+#include <gui/BufferQueue.h>
 
 #include <hardware/hwcomposer_defs.h>
 
@@ -54,6 +55,10 @@
 
 #include "DisplayHardware/HWComposer.h"
 #include "Effects/Daltonizer.h"
+
+#ifdef SAMSUNG_HDMI_SUPPORT
+#include "SecHdmiClient.h"
+#endif
 
 namespace android {
 
@@ -133,12 +138,7 @@ public:
     RenderEngine& getRenderEngine() const {
         return *mRenderEngine;
     }
-#ifdef QCOM_BSP
-    // Extended Mode - No video on primary and it will be shown full
-    // screen on External
-    static bool sExtendedMode;
-    static bool isExtendedMode() { return sExtendedMode; };
-#endif
+
 private:
     friend class Client;
     friend class DisplayEventConnection;
@@ -209,6 +209,11 @@ private:
             const sp<IGraphicBufferProducer>& producer,
             uint32_t reqWidth, uint32_t reqHeight,
             uint32_t minLayerZ, uint32_t maxLayerZ, bool isCpuConsumer);
+#ifdef USE_MHEAP_SCREENSHOT
+    virtual status_t captureScreen(const sp<IBinder>& display, sp<IMemoryHeap>* heap,
+        uint32_t* width, uint32_t* height, uint32_t reqWidth,
+        uint32_t reqHeight, uint32_t minLayerZ, uint32_t maxLayerZ);
+#endif
     // called when screen needs to turn off
     virtual void blank(const sp<IBinder>& display);
     // called when screen is turning back on
@@ -253,11 +258,17 @@ private:
     void handleTransaction(uint32_t transactionFlags);
     void handleTransactionLocked(uint32_t transactionFlags);
 
-#ifdef QCOM_HARDWARE
     // Read virtual display properties
     void setVirtualDisplayData( int32_t hwcDisplayId,
                                 const sp<IGraphicBufferProducer>& sink);
-#endif
+
+    // Configure Virtual Display parameters such as the display surface
+    // and the buffer queue
+    void configureVirtualDisplay(int32_t &hwcDisplayId,
+            sp<DisplaySurface> &dispSurface,
+            sp<IGraphicBufferProducer> &producer,
+            const DisplayDeviceState state,
+            sp<BufferQueue> bq);
 
     /* handlePageFilp: this is were we latch a new buffer
      * if available and compute the dirty region.
@@ -327,6 +338,14 @@ private:
             uint32_t minLayerZ, uint32_t maxLayerZ,
             bool useReadPixels);
 
+#ifdef USE_MHEAP_SCREENSHOT
+    status_t captureScreenImplCpuConsumerLocked(
+            const sp<const DisplayDevice>& hw,
+            sp<IMemoryHeap>* heap, uint32_t* width, uint32_t* height,
+            uint32_t reqWidth, uint32_t reqHeight,
+            uint32_t minLayerZ, uint32_t maxLayerZ);
+#endif
+
     /* ------------------------------------------------------------------------
      * EGL
      */
@@ -336,6 +355,9 @@ private:
         EGLint renderableType, EGLConfig* config);
     size_t getMaxTextureSize() const;
     size_t getMaxViewportDims() const;
+
+    uint32_t getMinColorDepth() const { return mMinColorDepth; }
+    inline bool getUseDithering() const { return mUseDithering; }
 
     /* ------------------------------------------------------------------------
      * Display and layer stack management
@@ -373,11 +395,7 @@ private:
      * Compositing
      */
     void invalidateHwcGeometry();
-#ifdef QCOM_HARDWARE
     static void computeVisibleRegions(size_t dpy,
-#else
-    static void computeVisibleRegions(
-#endif
             const LayerVector& currentLayers, uint32_t layerStack,
             Region& dirtyRegion, Region& opaqueRegion);
 
@@ -447,6 +465,7 @@ private:
     sp<EventThread> mEventThread;
     sp<EventThread> mSFEventThread;
     sp<EventControlThread> mEventControlThread;
+    uint32_t mMinColorDepth;
     EGLContext mEGLContext;
     EGLConfig mEGLConfig;
     EGLDisplay mEGLDisplay;
@@ -474,6 +493,24 @@ private:
     volatile nsecs_t mDebugInTransaction;
     nsecs_t mLastTransactionTime;
     bool mBootFinished;
+    bool mUseDithering;
+
+    // Set if the Gpu Tile render DR optimization enabled
+    bool mGpuTileRenderEnable;
+    bool mCanUseGpuTileRender;
+    Rect mUnionDirtyRect;
+
+#ifdef QCOM_BSP
+    // Set up the DirtyRect/flags for GPU Comp optimization if required.
+    void setUpTiledDr();
+    // Find out if GPU composition can use Dirtyregion optimization
+    // Get the union dirty rect to operate
+    bool computeTiledDr(const sp<const DisplayDevice>& hw);
+    enum {
+       GL_PRESERVE_NONE = 0,
+       GL_PRESERVE      = 1
+    };
+#endif
 
     // these are thread safe
     mutable MessageQueue mEventQueue;
@@ -495,6 +532,9 @@ private:
 
     Daltonizer mDaltonizer;
     bool mDaltonize;
+#if defined(SAMSUNG_HDMI_SUPPORT) && defined(SAMSUNG_EXYNOS5250)
+    SecHdmiClient *                         mHdmiClient;
+#endif
 };
 
 }; // namespace android

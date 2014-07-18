@@ -32,7 +32,7 @@
 #include <binder/Parcel.h>
 #include <utils/CallStack.h>
 
-#ifdef USE_V4L2_ION
+#if defined(USE_V4L2_ION) || defined(USE_MEMORY_HEAP_ION)
 #include "ion.h"
 #endif
 
@@ -308,6 +308,12 @@ void BpMemoryHeap::assertReallyMapped() const
         if (flags & USE_ION_FD) {
             ion_client = ion_client_create();
             ALOGE_IF(ion_client < 0, "BpMemoryHeap : ion client creation error");
+#endif
+#ifdef USE_MEMORY_HEAP_ION
+        ion_client ion_client_num = -1;
+        if (flags & USE_ION_FD) {
+            ion_client_num = ion_client_create();
+            ALOGE_IF(ion_client_num < 0, "BpMemoryHeap : ion client creation error");
         }
 #endif
 
@@ -324,9 +330,9 @@ void BpMemoryHeap::assertReallyMapped() const
         if (mHeapId == -1) {
             mRealHeap = true;
 
-#ifdef USE_V4L2_ION
+#if defined(USE_MEMORY_HEAP_ION) || defined(USE_V4L2_ION)
         if (flags & USE_ION_FD) {
-            if (ion_client < 0)
+            if (ion_client_num < 0)
                 mBase = MAP_FAILED;
             else
                 mBase = ion_map(fd, size, offset);
@@ -344,11 +350,11 @@ void BpMemoryHeap::assertReallyMapped() const
                 android_atomic_write(fd, &mHeapId);
             }
         }
-#ifdef USE_V4L2_ION
-        if (ion_client < 0)
-            ion_client = -1;
+#if defined(USE_MEMORY_HEAP_ION) || defined(USE_V4L2_ION)
+        if (ion_client_num < 0)
+            ion_client_num = -1;
         else
-            ion_client_destroy(ion_client);
+            ion_client_destroy(ion_client_num);
 #endif
     }
 }

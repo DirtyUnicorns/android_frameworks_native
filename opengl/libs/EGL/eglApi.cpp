@@ -162,8 +162,10 @@ static const extention_map_t sExtensionMap[] = {
         (!strcmp((procname), "eglSetBlobCacheFuncsANDROID") ||    \
          !strcmp((procname), "eglHibernateProcessIMG")      ||    \
          !strcmp((procname), "eglAwakenProcessIMG")         ||    \
-         !strcmp((procname), "eglDupNativeFenceFDANDROID")  ||	  \
-	 !strcmp((procname), "eglGpuPerfHintQCOM"))
+         !strcmp((procname), "eglDupNativeFenceFDANDROID")  ||    \
+         !strcmp((procname), "eglGpuPerfHintQCOM"))
+
+
 
 // accesses protected by sExtensionMapMutex
 static DefaultKeyedVector<String8, __eglMustCastToProperFunctionPointerType> sGLExtentionMap;
@@ -449,7 +451,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
 #else
         // by default, just pick RGBA_8888
 #ifdef USE_BGRA_8888
-        EGLine format = HAL_PIXEL_FORMAT_BGRA_8888;
+        EGLint format = HAL_PIXEL_FORMAT_BGRA_8888;
 #else
         EGLint format = HAL_PIXEL_FORMAT_RGBA_8888;
 #endif
@@ -1554,46 +1556,46 @@ EGLBoolean eglPresentationTimeANDROID(EGLDisplay dpy, EGLSurface surface,
 
     return EGL_TRUE;
 }
+
 // ----------------------------------------------------------------------------
 // QCOM extensions
 // ----------------------------------------------------------------------------
- #ifdef __cplusplus
- extern "C" {
- #endif
- EGLAPI EGLBoolean eglGpuPerfHintQCOM(EGLDisplay dpy, EGLContext ctx, EGLint *attrib_list);
- #ifdef __cplusplus
- }
- #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+EGLAPI EGLBoolean eglGpuPerfHintQCOM(EGLDisplay dpy, EGLContext ctx, EGLint *attrib_list);
+#ifdef __cplusplus
+}
+#endif
 
- EGLBoolean eglGpuPerfHintQCOM(EGLDisplay dpy, EGLContext ctx, EGLint *attrib_list)
- {
-     clearError();
+EGLBoolean eglGpuPerfHintQCOM(EGLDisplay dpy, EGLContext ctx, EGLint *attrib_list)
+{
+    clearError();
 
-     const egl_display_ptr dp = validate_display(dpy);
-     if (!dp) return EGL_FALSE;
+    const egl_display_ptr dp = validate_display(dpy);
+    if (!dp) return EGL_FALSE;
 
-     ContextRef _c(dp.get(), ctx);
-     if ((ctx != EGL_NO_CONTEXT) && !_c.get()) {
-         // ctx is not valid
-         return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-     }
+    ContextRef _c(dp.get(), ctx);
+    if ((ctx != EGL_NO_CONTEXT) && !_c.get()) {
+        // ctx is not valid
+        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
+    }
 
-     egl_context_t * c = NULL;
-     c = get_context(ctx);
+    egl_context_t * c = NULL;
+    c = get_context(ctx);
 
-     EGLint result = EGL_FALSE;
-     egl_connection_t* const cnx = &gEGLImpl;
-     if (cnx->dso && cnx->egl.eglGpuPerfHintQCOM) {
-         result = cnx->egl.eglGpuPerfHintQCOM(
-                 dp->disp.dpy,
-                 c->context,
-                 attrib_list);
-     }
-     return result;
+    EGLint result = EGL_FALSE;
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglGpuPerfHintQCOM) {
+        result = cnx->egl.eglGpuPerfHintQCOM(
+                dp->disp.dpy,
+                c->context,
+                attrib_list);
+    }
+    return result;
 
- }
+}
 
- // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // NVIDIA extensions
 // ----------------------------------------------------------------------------
