@@ -236,6 +236,9 @@ struct InputReaderConfiguration {
 
     // True to show the location of touches on the touch screen as spots.
     bool showTouches;
+    
+    // Ignore finger touches this long after the stylus has been used (including hover)
+    nsecs_t stylusPalmRejectionTime;
 
     // Remap volume keys according to display rotation
     // 0 - disabled, 1 - phone or hybrid rotation mode, 2 - tablet rotation mode
@@ -259,6 +262,7 @@ struct InputReaderConfiguration {
             pointerGestureZoomSpeedRatio(0.3f),
             stylusPalmRejectionTime(50 * 10000000LL), // 50 ms
             showTouches(false),
+            stylusPalmRejectionTime(50 * 10000000LL), // 50 ms
             volumeKeysRotationMode(0) { }
 
     bool getDisplayInfo(bool external, DisplayViewport* outViewport) const;
