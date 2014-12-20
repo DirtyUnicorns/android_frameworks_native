@@ -263,8 +263,7 @@ struct InputReaderConfiguration {
             showTouches(false),
             stylusIconEnabled(false),
             stylusPalmRejectionTime(50 * 10000000LL), // 50 ms
-            volumeKeysRotationMode(0)
-    { }
+            volumeKeysRotationMode(0) { }
 
     bool getDisplayInfo(bool external, DisplayViewport* outViewport) const;
     void setDisplayInfo(bool external, const DisplayViewport& viewport);
