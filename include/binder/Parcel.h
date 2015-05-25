@@ -147,13 +147,16 @@ public:
     status_t            writeNoException();
 
     void                remove(size_t start, size_t amt);
-    
+
     status_t            read(void* outData, size_t len) const;
     const void*         readInplace(size_t len) const;
     int32_t             readInt32() const;
     status_t            readInt32(int32_t *pArg) const;
     int64_t             readInt64() const;
     status_t            readInt64(int64_t *pArg) const;
+#ifdef NEEDS_LGE_RIL_SYMBOLS
+    status_t            readuInt64(uint64_t *pArg) const;
+#endif
     float               readFloat() const;
     status_t            readFloat(float *pArg) const;
     double              readDouble() const;
