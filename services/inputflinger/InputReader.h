@@ -231,15 +231,15 @@ struct InputReaderConfiguration {
     // will cover this portion of the display diagonal.
     float pointerGestureZoomSpeedRatio;
 
+    // Ignore finger touches this long after the stylus has been used (including hover)
+    nsecs_t stylusPalmRejectionTime;
+
     // True to show the location of touches on the touch screen as spots.
     bool showTouches;
 
     // Remap volume keys according to display rotation
     // 0 - disabled, 1 - phone or hybrid rotation mode, 2 - tablet rotation mode
     int volumeKeysRotationMode;
-
-    // Ignore finger touches this long after the stylus has been used (including hover)
-    nsecs_t stylusPalmRejectionTime;
 
     InputReaderConfiguration() :
             virtualKeyQuietTime(0),
