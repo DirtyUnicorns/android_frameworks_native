@@ -1233,7 +1233,7 @@ void SurfaceFlinger::rebuildLayerStacks() {
             const Transform& tr(displayDevice->getTransform());
             const Rect bounds(displayDevice->getBounds());
             if (displayDevice->isDisplayOn()) {
-                SurfaceFlinger::computeVisibleRegions(displayDevice->getHwcDisplayId(), layers,
+                SurfaceFlinger::computeVisibleRegions(displayDevice->getHwcDisplayId(), dpy, layers,
                         displayDevice->getLayerStack(), dirtyRegion,
                         opaqueRegion);
 
