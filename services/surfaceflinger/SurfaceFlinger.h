@@ -256,6 +256,7 @@ private:
                      bool& /*bIgnoreLayers*/,
                      int& /*indexLOI*/) { }
 
+#ifndef USE_HWC2
     virtual bool updateLayerVisibleNonTransparentRegion(
                      const int& dpy, const sp<Layer>& layer,
                      bool& bIgnoreLayers, int& indexLOI,
@@ -278,10 +279,12 @@ private:
                      const int32_t& /*id*/) { }
 
     virtual void updateVisibleRegionsDirty() { }
+
     virtual void  drawWormHoleIfRequired(HWComposer::LayerListIterator &cur,
         const HWComposer::LayerListIterator &end,
         const sp<const DisplayDevice>& hw,
         const Region& region);
+#endif
     virtual bool isS3DLayerPresent(const sp<const DisplayDevice>& /*hw*/)
         { return false; };
     /* ------------------------------------------------------------------------
