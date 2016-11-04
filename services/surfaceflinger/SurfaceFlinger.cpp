@@ -501,7 +501,7 @@ void SurfaceFlinger::init() {
     getDefaultDisplayDevice()->makeCurrent(mEGLDisplay, mEGLContext);
 
     mEventControlThread = new EventControlThread(this);
-    mEventControlThread->run("EventControl", PRIORITY_URGENT_DISPLAY);
+    mEventControlThread->run("EventControl", PRIORITY_REALTIME);
     android_set_rt_ioprio(mEventControlThread->getTid(), 1);
 
     // initialize our drawing state
