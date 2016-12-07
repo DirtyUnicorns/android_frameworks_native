@@ -57,6 +57,7 @@ struct layer_state_t {
         eOverrideScalingModeChanged = 0x00000800,
         ePositionAppliesWithResize  = 0x00001000,
         eColorChanged               = 0x00002000,
+        eGeometryAppliesWithResize  = 0x00001000,
     };
 
     layer_state_t()
