@@ -485,7 +485,7 @@ void SurfaceFlinger::init() {
     // set SFEventThread to SCHED_FIFO to minimize jitter
     if (mSFEventThread != NULL) {
         struct sched_param param = {0};
-        param.sched_priority = 2;
+        param.sched_priority = 4;
         if (sched_setscheduler(mSFEventThread->getTid(), SCHED_FIFO, &param) != 0) {
             ALOGE("Couldn't set SCHED_FIFO for SFEventThread");
         }
@@ -2610,7 +2610,7 @@ void SurfaceFlinger::setPowerModeInternal(const sp<DisplayDevice>& hw,
         repaintEverything();
 
         struct sched_param param = {0};
-        param.sched_priority = 1;
+        param.sched_priority = 2;
         if (sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
             ALOGW("Couldn't set SCHED_FIFO on display on");
         }
