@@ -42,9 +42,7 @@ int main(int, char**) {
     // instantiate surfaceflinger
     sp<SurfaceFlinger> flinger = DisplayUtils::getInstance()->getSFInstance();
 
-    setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY);
-
-    set_sched_policy(0, SP_FOREGROUND);
+    setpriority(PRIO_PROCESS, 0, PRIORITY_REALTIME);
 
 #ifdef ENABLE_CPUSETS
     // Put most SurfaceFlinger threads in the system-background cpuset
@@ -65,9 +63,9 @@ int main(int, char**) {
     sm->addService(String16(GpuService::SERVICE_NAME), gpuservice, false);
 
     struct sched_param param = {0};
-    param.sched_priority = 2;
-    if (sched_setscheduler(0, SCHED_FIFO, &param) != 0) {
-        ALOGE("Couldn't set SCHED_FIFO");
+    param.sched_priority = 4;
+    if (sched_setscheduler(0, SCHED_RR, &param) != 0) {
+        ALOGE("Couldn't set SCHED_RR");
     }
 
     // run surface flinger in this thread
