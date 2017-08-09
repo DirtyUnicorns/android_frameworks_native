@@ -65,7 +65,6 @@
 #include <private/gui/SyncFeatures.h>
 
 #include "./DisplayUtils.h"
-
 #include <set>
 
 #include "Client.h"
@@ -477,11 +476,25 @@ void SurfaceFlinger::init() {
                 sfVsyncPhaseOffsetNs, true, "sf");
         mSFEventThread = new EventThread(sfVsyncSrc, *this);
         mEventQueue.setEventThread(mSFEventThread);
+
+       // set SFEventThread to SCHED_FIFO to minimize jitter
+       struct sched_param param = {0};
+       param.sched_priority = 2;
+       if (sched_setscheduler(mSFEventThread->getTid(), SCHED_FIFO, &param) != 0) {
+           ALOGE("Couldn't set SCHED_FIFO for SFEventThread");
+       }
     } else {
         sp<VSyncSource> vsyncSrc = new DispSyncSource(&mPrimaryDispSync,
                          vsyncPhaseOffsetNs, true, "sf-app");
         mEventThread = new EventThread(vsyncSrc, *this);
         mEventQueue.setEventThread(mEventThread);
+
+       // set EventThread to SCHED_FIFO to minimize jitter
+       struct sched_param param = {0};
+       param.sched_priority = 2;
+       if (sched_setscheduler(mEventThread->getTid(), SCHED_FIFO, &param) != 0) {
+           ALOGE("Couldn't set SCHED_FIFO for SFEventThread");
+       }
     }
 
     // set SFEventThread to SCHED_RR to minimize jitter
@@ -833,10 +846,53 @@ status_t SurfaceFlinger::getAnimationFrameStats(FrameStats* outStats) const {
     return NO_ERROR;
 }
 
-status_t SurfaceFlinger::getHdrCapabilities(const sp<IBinder>& /*display*/,
+status_t SurfaceFlinger::getHdrCapabilities(const sp<IBinder>& display,
         HdrCapabilities* outCapabilities) const {
-    // HWC1 does not provide HDR capabilities
+
+    if (!display.get())
+        return NAME_NOT_FOUND;
+
+    int32_t type = NAME_NOT_FOUND;
+    for (int i=0 ; i < DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES ; i++) {
+        if (display == mBuiltinDisplays[i]) {
+            type = i;
+            break;
+        }
+    }
+
+    if (type < 0) {
+        return type;
+    }
+
+#ifdef QTI_BSP
+    // Call into display.qservice
+    Parcel reply;
+    sp<IServiceManager> sm(defaultServiceManager());
+    sp<IBinder> binder =
+        sm->getService(String16("display.qservice"));
+    Parcel input;
+    input.writeInterfaceToken(String16("android.display.IQService"));
+    input.writeInt32(type);
+    // GET_HDR_CAPABILITIES = 35 from IQService.h
+    binder->transact(35, input, &reply);
+    if (outCapabilities != nullptr) {
+        outCapabilities->readFromParcel(&reply);
+        if (outCapabilities->getSupportedHdrTypes().size() != 0) {
+            ALOGD("HDR support on display: %d", type);
+            for (auto hdrtype : outCapabilities->getSupportedHdrTypes()) {
+                ALOGD(" HDR type: %d", hdrtype);
+            }
+            ALOGD(" HDR max luminance: %f", outCapabilities->getDesiredMaxLuminance());
+            ALOGD(" HDR max avg luminance: %f",
+                  outCapabilities->getDesiredMaxAverageLuminance());
+            ALOGD(" HDR min luminance: %f", outCapabilities->getDesiredMinLuminance());
+        } else {
+            ALOGI("HDR is not supported on display: %d", type);
+        }
+    }
+#else
     *outCapabilities = HdrCapabilities();
+#endif
     return NO_ERROR;
 }
 
@@ -1136,7 +1192,7 @@ void SurfaceFlinger::postComposition(nsecs_t refreshStartTime)
         mAnimFrameTracker.advanceFrame();
     }
 
-    dumpDrawCycle(true);
+    dumpDrawCycle(false);
 
     if (hw->getPowerMode() == HWC_POWER_MODE_OFF) {
         return;
@@ -3264,6 +3320,40 @@ status_t SurfaceFlinger::onTransact(
             case 1021: { // Disable HWC virtual displays
                 n = data.readInt32();
                 mUseHwcVirtualDisplays = !n;
+                return NO_ERROR;
+            }
+            case 10000: { // Get frame stats of specific layer
+                FrameStats frameStats;
+                size_t arraySize = 0;
+                int layerIndex = -1;
+                String8 layerName = String8(data.readString16());
+                String8 surfaceView = String8("SurfaceView -");
+                const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+                const size_t count = currentLayers.size();
+                for (size_t i=0 ; i<count ; i++) {
+                    const sp<Layer>& layer(currentLayers[i]);
+                    if (layer->getName().contains(layerName)) {
+                        if (layer->getName().contains(surfaceView)) {
+                            layer->getFrameStats(&frameStats);
+                            arraySize = frameStats.actualPresentTimesNano.size();
+                            if (arraySize == 0) {
+                                continue;
+                            } else {
+                                break;
+                            }
+                        }
+                        layerIndex = i;
+                    }
+                }
+                if ((arraySize == 0) && (layerIndex >= 0)){
+                    const sp<Layer>& layer(currentLayers[layerIndex]);
+                    layer->getFrameStats(&frameStats);
+                    arraySize = frameStats.actualPresentTimesNano.size();
+                }
+                reply->writeInt32(arraySize);
+                if (arraySize > 0) {
+                    reply->write(frameStats.actualPresentTimesNano.array(), 8*arraySize);
+                }
                 return NO_ERROR;
             }
         }
