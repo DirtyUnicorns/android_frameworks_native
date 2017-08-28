@@ -801,8 +801,7 @@ status_t SurfaceFlinger::getDisplayConfigs(const sp<IBinder>& display,
             info.w = hwConfig->getHeight();
             info.xdpi = ydpi;
             info.ydpi = xdpi;
-        }
-        else {
+        } else {
             info.w = hwConfig->getWidth();
             info.h = hwConfig->getHeight();
             info.xdpi = xdpi;

@@ -488,7 +488,7 @@ status_t DisplayDevice::orientationToTransfrom(
 {
     uint32_t flags = 0;
 
-    if (mHardwareRotation && mType == DISPLAY_PRIMARY) {
+    if (mHardwareRotation && mType == DisplayType::DISPLAY_PRIMARY) {
         orientation += mHardwareRotation;
         orientation %= 4;
     }
